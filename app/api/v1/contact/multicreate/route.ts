@@ -4,8 +4,6 @@ import { db } from "@/lib/db";
 import { ContactSchema } from "@/schemas";
 import { isValidTimezone, verifyToken } from "@/lib/utils";
 
-
-
 // BULK POST: Create multiple contacts
 export const POST = async (req: NextRequest) => {
   try {
@@ -41,6 +39,14 @@ export const POST = async (req: NextRequest) => {
           error: "Invalid timezone",
         });
         continue;
+      }
+
+      const existingUser = await db.user.findUnique({
+        where: { id: decoded.id },
+      });
+
+      if (!existingUser) {
+        return NextResponse.json({ error: "User not found" }, { status: 400 });
       }
 
       // Check if contact already exists

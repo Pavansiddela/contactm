@@ -840,6 +840,345 @@
           }
         }
       }
+    },
+
+    "/contact/multicreate": {
+      "post": {
+        "summary": "Create multiple contacts",
+        "description": "Creates multiple new contacts for the authenticated user.",
+        "operationId": "createMultipleContacts",
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/CreateContact"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Contacts created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "createdContacts": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Contact"
+                      }
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "contact": {
+                            "type": "string",
+                            "description": "Email of the contact with error"
+                          },
+                          "error": {
+                            "type": "string",
+                            "description": "Error message"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request (validation errors, invalid timezone, or invalid request body format)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Request body should be an array of contacts"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized (token verification failed)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/contact/bulk": {
+      "post": {
+        "summary": "Import contacts from CSV or Excel file",
+        "description": "Imports multiple contacts from an uploaded CSV or Excel file for the authenticated user.",
+        "operationId": "importContacts",
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["file"],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "description": "CSV or Excel file containing contact data",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contacts imported successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Contacts imported successfully"
+                    },
+                    "count": {
+                      "type": "integer",
+                      "description": "Number of contacts imported"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request (validation errors, invalid file type, or no file provided)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "string",
+                          "example": "No file provided"
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "string",
+                          "example": "Please upload a CSV or Excel file"
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "string",
+                          "example": "Validation failed"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "row": {
+                                "type": "integer",
+                                "description": "Row number in the file (1-based, including header)"
+                              },
+                              "errors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "field": {
+                                      "type": "string",
+                                      "description": "Field name where the error occurred"
+                                    },
+                                    "message": {
+                                      "type": "string",
+                                      "description": "Validation error message"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized (token verification failed)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/contact/retrive": {
+      "post": {
+        "summary": "Retrieve contacts with date filtering",
+        "description": "Get contacts with support for date range filtering and timezone conversion",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "startDate",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "description": "Start date for filtering contacts"
+          },
+          {
+            "in": "query",
+            "name": "endDate",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "description": "End date for filtering contacts"
+          },
+          {
+            "in": "query",
+            "name": "timezone",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Timezone for date conversions (default UTC)",
+            "example": "Asia/Kolkata"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "timezone": {
+                    "type": "string",
+                    "description": "Alternative way to specify timezone"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved contacts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "contactsWithConvertedTimestamps": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Contact"
+                      },
+                      "description": "List of contacts with timestamps converted to specified timezone"
+                    },
+                    "timezone": {
+                      "type": "object",
+                      "properties": {
+                        "time": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "before": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "zone": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "zonedDate": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid date range",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access or invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
 
@@ -966,6 +1305,14 @@
           }
         }
       },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        }
+      },
       "RegisterResponseSuccess": {
         "type": "object",
         "properties": {
@@ -998,6 +1345,7 @@
         }
       }
     },
+
     "ErrorResponse409ConflictUserExists": {
       "type": "object",
       "properties": {
@@ -1006,6 +1354,7 @@
         }
       }
     },
+
     "ErrorResponse500Internal": null
   }
 }
