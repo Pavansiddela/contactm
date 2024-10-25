@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import jwt from "jsonwebtoken";
 import moment from "moment";
-
+export const liveUrl = "https://contactm.vercel.app/";
 export const timezones = [
   "America/New_York",
   "America/Los_Angeles",
