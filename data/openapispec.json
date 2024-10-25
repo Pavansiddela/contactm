@@ -1,0 +1,1011 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Contact Management API By Pavan",
+    "description": "API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api/v1"
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "summary": "Register a new user",
+        "description": "Creates a new user account and sends a verification email.",
+        "operationId": "registerUser",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 3,
+                    "description": "The name of the user."
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "The email address of the user."
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 6,
+                    "description": "The password for the user account."
+                  }
+                },
+                "required": ["name", "email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User created successfully and verification email sent.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Success": {
+                      "type": "string",
+                      "example": "User Created and Verify Your Email"
+                    },
+                    "newUser": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "description": "The ID of the newly created user."
+                        },
+                        "name": {
+                          "type": "string",
+                          "description": "The name of the newly created user."
+                        },
+                        "email": {
+                          "type": "string",
+                          "description": "The email of the newly created user."
+                        },
+                        "emailverified": false
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request (validation error).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (user already exists).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "User Already Exists"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Login a user",
+        "description": "Authenticates a user and returns a JWT token store as in form of token under token name.",
+        "operationId": "loginUser",
+
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "The email address of the user."
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 6,
+                    "description": "The password for the user account."
+                  }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "string",
+                      "example": "Login successful"
+                    }
+                  }
+                }
+              }
+            }
+          },
+
+          "401": {
+            "description": "Invalid Credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Invalid Credentials"
+                    }
+                  }
+                }
+              }
+            }
+          },
+
+          "400": {
+            "description": "Invalid fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": { "type": "string", "example": "Invalid fields" }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Internal Server Error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/emailverify": {
+      "get": {
+        "summary": "Verify user email",
+        "description": "Verifies the user's email using a verification token.",
+        "operationId": "verifyEmail",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "description": "The verification token sent to the user's email.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Email verified successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "string",
+                      "example": "Email verified Successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400_Expired_Token": {
+            "description": "Token is expired and new OTP link generated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Token is expired and new OTP link generated"
+                    }
+                  }
+                }
+              }
+            }
+          },
+
+          "400_Token_Not_Found": {
+            "description": "Token is missing in db",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Token is missing in db"
+                    }
+                  }
+                }
+              }
+            }
+          },
+
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/resetpassword": {
+      "post": {
+        "summary": "Send password reset email",
+        "description": "Generates a password reset token and sends it to the user's email.",
+        "operationId": "sendResetPasswordEmail",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "The email address of the user."
+                  }
+                },
+                "required": ["email"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reset mail sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "string",
+                      "example": "Reset Mail is Sent to Your Mail"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request (validation error)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "User Doesn't Exists"
+                    }
+                  }
+                }
+              }
+            }
+          },
+
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/auth/newpassword": {
+      "post": {
+        "summary": "Reset user password",
+        "description": "Resets the user's password using a valid reset token.",
+        "operationId": "resetUserPassword",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "description": "The password reset token sent to the user's email.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewPasswordRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password reset completed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "string",
+                      "example": "Password Reset Completed"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request (validation error)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "404_Invalid_Token": {
+              "description": "'Invalid Token' or 'Email not existing in db'",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "type": "string",
+                        "example": "'Invalid Token'"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+
+            "404_Expired_Token": {
+              "description": "'Token is expired'",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "type": "string",
+                        "example": "'Token is expired'"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+
+            "500": {
+              "description": "'Internal Server Error.'",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/contact/create": {
+      "post": {
+        "summary": "Create a new contact",
+        "description": "Creates a new contact for the authenticated user.",
+        "operationId": "createContact",
+
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateContact"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Contact created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateContactResponseBody"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request (validation error or invalid timezone)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "'Already Exists' if the contact already exists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "'Already Exists'"
+                    }
+                  }
+                }
+              }
+            }
+          },
+
+          "401": {
+            "description": "'Unauthorized' if token verification fails.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "'Unauthorized'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "put": {
+        "summary": "Update an existing contact",
+        "description": "Updates an existing contact for the authenticated user.",
+        "operationId": "updateContact",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The name of the contact."
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "The email address of the contact."
+                  },
+                  "phoneNumber": {
+                    "type": "string",
+                    "description": "The phone number of the contact."
+                  },
+                  "address": { "type": "string" }
+                },
+                "required": ["email"]
+              }
+            }
+          }
+        },
+
+        "responses": {
+          "200": {
+            "description": "Contact updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Contact"
+                }
+              }
+            }
+          },
+
+          "400": {
+            "description": "Bad Request (validation error or invalid timezone)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+
+          "404": {
+            "description": "Contact not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "'Contact not found'"
+                    }
+                  }
+                }
+              }
+            }
+          },
+
+          "401": {
+            "description": "'Unauthorized' if token verification fails.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "'Unauthorized'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "delete": {
+        "summary": "Soft delete a contact",
+        "description": "Marks a contact as deleted for the authenticated user.",
+        "operationId": "deleteContact",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "The email of the contact to be deleted."
+                  }
+                },
+                "required": ["email"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contact soft deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Contact"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Contact not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "'Contact not found'"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "'Unauthorized' if token verification fails.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "'Unauthorized'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/contact/allcontacts": {
+      "get": {
+        "summary": "Retrieve all user contacts",
+        "description": "Fetches a list of all contacts for the authenticated user.",
+        "operationId": "getAllUserContacts",
+        "responses": {
+          "200": {
+            "description": "Contacts retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "zone": {
+                      "type": "string",
+                      "description": "The user's timezone date formatted string."
+                    },
+                    "contacts": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Contact"
+                      },
+                      "description": "List of user contacts."
+                    },
+                    "zsone": {
+                      "type": "string",
+                      "description": "The UTC date and time."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "'Unauthorized' if no token is provided or token verification fails.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "'Unauthorized'"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "'Internal Server Error.' if an unexpected error occurs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+
+  "components": {
+    "securitySchemes": {
+      "CookieAuth": {
+        "type": "apiKey",
+        "name": "token",
+        "in": "header",
+        "description": "The authorization token in the form of `Bearer <token>`"
+      }
+    },
+    "cookies": {
+      "LoginCookie": {
+        "type": "object",
+        "properties": {
+          "Set-Cookie": {
+            "type": "string",
+            "description": "JWT token set as an HTTP-only cookie.",
+            "example": "token=your_jwt_token; HttpOnly; Path=/;"
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Contact": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the contact."
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "The email address of the contact."
+          },
+          "phoneNumber": {
+            "type": "string",
+            "description": "The phone number of the contact."
+          },
+          "timezone": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateContact": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the contact."
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "The email address of the contact."
+          },
+          "phoneNumber": {
+            "type": "string",
+            "description": "The phone number of the contact."
+          },
+          "address": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          }
+        },
+        "required": ["email", "name", "phoneNumber", "address", "timezone"]
+      },
+      "CreateContactResponseBody": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "The unique identifier for the contact."
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the contact."
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "The email address of the contact."
+          },
+          "phoneNumber": {
+            "type": "string",
+            "description": "The phone number of the contact."
+          },
+          "address": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the contact was created."
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the contact was created."
+          }
+        }
+      },
+      "RegisterRequestBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 3
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6
+          }
+        }
+      },
+      "RegisterResponseSuccess": {
+        "type": "object",
+        "properties": {
+          "Success": {
+            "type": "string"
+          },
+          "newUser": {
+            "$ref": "#/components/schemas/NewUser"
+          }
+        }
+      },
+      "NewPasswordRequestBody": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "minLength": "6",
+            "description": "The new password for the user account."
+          }
+        },
+        "required": ["password"]
+      }
+    },
+
+    "ErrorResponse400": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "object"
+        }
+      }
+    },
+    "ErrorResponse409ConflictUserExists": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string"
+        }
+      }
+    },
+    "ErrorResponse500Internal": null
+  }
+}
